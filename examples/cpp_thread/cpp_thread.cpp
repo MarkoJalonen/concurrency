@@ -19,5 +19,8 @@ int main(){
     for(auto& thread : thread_buffer){
         thread.join();                                  // close the thread obj.
     }
-    return EXIT_SUCCESS;
-}
+}                                                       // called synchronization,
+                                                        // it might try to kill a
+                                                        // function that has not 
+                                                        // yet started and it has 
+                                                        // to wait
