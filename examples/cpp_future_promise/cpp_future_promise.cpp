@@ -13,7 +13,7 @@ int main(){
     std::thread thread(setter, std::move(retval));  // start a thread with setter
                                                     // and give the promise obj to it
                                                     // and remove it from main
-    thread.join();                                  
+    thread.join();                                  // join syncs, makes sure get won't wait      
     int value = future.get();
 
     std::cout << value << std::endl;  

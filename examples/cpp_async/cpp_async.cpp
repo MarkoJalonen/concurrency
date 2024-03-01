@@ -2,6 +2,8 @@
 #include <iostream>
 #include <future>
 
+// async is not anymore recommended! has fun edge cases
+
 int calcA(){
     return 16;
 }
