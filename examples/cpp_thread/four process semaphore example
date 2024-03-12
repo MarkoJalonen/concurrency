@@ -1,0 +1,95 @@
+#include <iostream>
+#include <random>
+#include <cstdint>
+#include <thread>
+#include <semaphore>
+#include <vector>
+
+// Configuration values
+struct CONFIG {
+    static const uint64_t DIV = 2; // The value to divide by in processingB
+    static const uint64_t ADD = 3; // The value to add in processingC
+};
+
+// Semaphores for synchronization
+// Each semaphore controls access to a specific data variable
+std::vector<std::binary_semaphore> semA(4, 1), semB(4, 0), semC(4, 0), semD(4, 0);
+
+// Data storage
+// Each thread has its own data variables to avoid race conditions
+std::vector<uint64_t> dataA(4), dataB(4), dataC(4);
+
+// Function for processingA
+// This function generates a random number and stores it in dataA
+void processingA(int i) {
+    std::random_device rd;
+    std::mt19937_64 gen(rd());
+    std::uniform_int_distribution<uint64_t> dis;
+
+    while(true) {
+        semA[i].acquire(); // Acquire the semaphore before accessing the data
+        dataA[i] = dis(gen); // Generate a random number and store it in dataA
+        std::cout << "A" << i << ": " << dataA[i] << std::endl; // Print the data
+        semB[i].release(); // Release the next semaphore after the data is processed
+    }
+}
+
+// Function for processingB
+// This function divides the number in dataA by CONFIG::DIV and stores the result in dataB
+void processingB(int i) {
+    while(true) {
+        semB[i].acquire(); // Acquire the semaphore before accessing the data
+        dataB[i] = dataA[i] / CONFIG::DIV; // Divide the data by CONFIG::DIV and store the result in dataB
+        std::cout << "B" << i << ": " << dataB[i] << std::endl; // Print the data
+        semC[i].release(); // Release the next semaphore after the data is processed
+    }
+}
+
+// Function for processingC
+// This function adds CONFIG::ADD to the number in dataB and stores the result in dataC
+void processingC(int i) {
+    while(true) {
+        semC[i].acquire(); // Acquire the semaphore before accessing the data
+        dataC[i] = dataB[i] + CONFIG::ADD; // Add CONFIG::ADD to the data and store the result in dataC
+        std::cout << "C" << i << ": " << dataC[i] << std::endl; // Print the data
+        semD[i].release(); // Release the next semaphore after the data is processed
+    }
+}
+
+// Function for processingD
+// This function prints the number in dataC
+void processingD(int i) {
+    while(true) {
+        semD[i].acquire(); // Acquire the semaphore before accessing the data
+        std::cout << "D" << i << ": " << dataC[i] << std::endl; // Print the data
+        semA[i].release(); // Release the next semaphore after the data is processed
+    }
+}
+
+int main() {
+    std::vector<std::thread> threadsA, threadsB, threadsC, threadsD;
+
+    // Create 4 threads for each process
+    for(int i = 0; i < 4; ++i) {
+        threadsA.push_back(std::thread(processingA, i));
+        threadsB.push_back(std::thread(processingB, i));
+        threadsC.push_back(std::thread(processingC, i));
+        threadsD.push_back(std::thread(processingD, i));
+    }
+
+    // Join the threads
+    for(auto& thread : threadsA) {
+        thread.join();
+    }
+    for(auto& thread : threadsB) {
+        thread.join();
+    }
+    for(auto& thread : threadsC) {
+        thread.join();
+    }
+    for(auto& thread : threadsD) {
+        thread.join();
+    }
+
+    return 0;
+}
