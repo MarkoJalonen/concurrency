@@ -1,12 +1,6 @@
-# https://www.cs.colby.edu/maxwell/courses/tutorials/maketutor/
-# https://www.learncpp.com
+CC = g++
+CFLAGS 	= -I. -ggdb -pedantic-errors -Wall -Wextra -Wconversion \
+-Wsign-conversion -Werror -std=c++20
 
-# In progress
-
-COMPILER 		= g++
-COMPILERFLAGS 	= -ggdb -pedantic-errors -Wall -Weffc++ -Wextra -Wconversion \
-				  -Wsign-conversion -Werror -std=c++20
-
-DEPENDENCIES 	= concurrency.h 
-LIBRARIES		= 
-OBJECTDIR 		= obj
+make: main.cpp
+	$(CC) -o main main.cpp $(CFLAGS)  
